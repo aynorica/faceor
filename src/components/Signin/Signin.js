@@ -1,42 +1,43 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { loadSignInEmail, loadSignInPassword } from '../../containers/actions'
+
+const mapStateToProps = (state) => {
+    return {
+        signInEmail: state.signInInfo.signInEmail,
+        signInPassword: state.signInInfo.signInPassword
+    }
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        onEmailChange: (event) => dispatch(loadSignInEmail(event.target.value)),
+        onPasswordChange: (event) => dispatch(loadSignInPassword(event.target.value))
+    }
+};
 
 class Signin extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            signInEmail: '',
-            signInPassword: ''
-        }
-    }
-
-    onEmailChange = (event) => {
-        this.setState({signInEmail: event.target.value})
-    };
-
-    onPasswordChange = (event) => {
-        this.setState({signInPassword: event.target.value})
-    };
-
     onSubmitSignIn = () => {
+        const { signInEmail, signInPassword, loadUser, onRouteChange } = this.props;
         fetch('https://damp-retreat-33615.herokuapp.com/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                email: this.state.signInEmail,
-                password: this.state.signInPassword
+                email: signInEmail,
+                password: signInPassword
             })
         })
             .then(response => response.json())
             .then(user => {
                 if (user.id) {
-                    this.props.loadUser(user);
-                    this.props.onRouteChange('home');
+                    loadUser(user);
+                    onRouteChange('home');
                 }
             })
     };
 
     render() {
-        const { onRouteChange } = this.props;
+        const { onRouteChange, onEmailChange, onPasswordChange } = this.props;
         return (
             <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
                 <main className="pa4 black-80">
@@ -50,7 +51,7 @@ class Signin extends React.Component {
                                     type="email"
                                     name="email-address"
                                     id="email-address"
-                                    onChange={this.onEmailChange}
+                                    onChange={onEmailChange}
                                 />
                             </div>
                             <div className="mv3">
@@ -60,11 +61,11 @@ class Signin extends React.Component {
                                     type="password"
                                     name="password"
                                     id="password"
-                                    onChange={this.onPasswordChange}
+                                    onChange={onPasswordChange}
                                 />
                             </div>
                         </fieldset>
-                        <div className="">
+                        <div>
                             <input
                                 onClick={this.onSubmitSignIn}
                                 className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
@@ -82,4 +83,4 @@ class Signin extends React.Component {
     }
 }
 
-export default Signin;
+export default connect(mapStateToProps, mapDispatchToProps)(Signin);
